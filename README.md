@@ -1,49 +1,58 @@
 # LiNKdev
 
-**Continuous Multi-Agent Software Development Orchestration** — portable factory template (v1.0.0).
+**Continuous Multi-Agent Software Development Orchestration** — portable factory template.
 
-LiNKdev is the productized name for the LiNKdev factory: a copyable pack that wires Cursor, Codex, and peer executors into a governed **Programs → Modules → Phases → Issues** loop with proof, gates, and progressive disclosure for agents.
-
-## What you get
+Copy **only** `LiNKdev/` + `.cursor/` into product repos. **Principal** is the single human authority (Go, Continue, promotion to `staging`/`main`).
 
 | Path | Purpose |
 |------|---------|
-| `LiNKdev/` | Factory (`factory/`), universal skills (`skills/gstack/`), virgin `product/` stubs |
-| `.cursor/` | Portable Cursor bootstrap (entry rule → `LiNKdev/AGENTS.md`) |
-| `install.sh` | Copy `LiNKdev/` and `.cursor/` into a target repository |
-| `VERSION` | Template semver (`1.0.0`) |
+| `LiNKdev/` | Factory, gstack skills, virgin `product/` stubs on first install |
+| `.cursor/` | Bootstrap rule → `LiNKdev/AGENTS.md` |
+| `install.sh` | First-time install into a repo |
+| `upgrade.sh` / `scripts/sync-installations.sh` | Push factory updates to registered repos |
+| `registry/installations.json` | Repos that receive auto-sync on **tag** |
+| `VERSION` | Template semver |
 
-There is **no** root `AGENTS.md`. Agents start from `.cursor/rules/00-linkdev-bootstrap.mdc`, then `LiNKdev/AGENTS.md` and `LiNKdev/factory/SPEC.md`.
+**Releases:** [https://github.com/linktrend/LiNKdev/releases](https://github.com/linktrend/LiNKdev/releases)
 
-## Human authority: Principal (not Chairman)
+## Principal launch (wire — three lines only)
 
-This template uses **Principal** for the single human authority who approves Go, Continue, Release OK, and promotion to `staging` / `main`. LiNKtrend-hosted repos may still say Principal in older factory copy; new installs should standardize on Principal in product grounding and program docs.
+See **`LiNKdev/factory/install/PRINCIPAL-LAUNCH.md`**.
 
-## Install into a product repo
+| Step | Agent | One line |
+|------|--------|----------|
+| A | Cursor | `Execute the EXECUTE-WIRE-LINKDEV.md prompt in LiNKdev/factory/install/` |
+| B | Codex | `Execute the EXECUTE-LINKDEV-UI-AUTOMATIONS.md prompt in LiNKdev/factory/install/` |
+| C | Cursor | `Execute the EXECUTE-WIRE-LINKDEV-POST-UI.md prompt in LiNKdev/factory/install/` |
 
-From this template directory (or after cloning the published LiNKdev template repo):
+Agents run autonomously; you do not walk through the checklist.
+
+## Install (first time)
 
 ```bash
+git clone https://github.com/linktrend/LiNKdev.git
+cd LiNKdev
 ./install.sh /path/to/your-product-repo
 ```
 
-Then open the target repo in Cursor and run the wire flow: `LiNKdev/factory/install/WIRE-PROMPT.md` and `LiNKdev/factory/install/CHECKLIST.md`.
+Add your repo to `registry/installations.json` and configure GitHub secret **`LINKDEV_SYNC_TOKEN`** on this repo for automatic upgrades.
 
-## Virgin `product/`
+## Auto-update installed repos
 
-- **grounding/** — `VISION.md`, `SHIP_CRITERIA.md`, `INTENT.md`, `CONSTRAINTS.md`, `GLOSSARY.md` (minimal stubs)
-- **programs/** — empty except `README.md` (Planner creates `<program-id>/` after Principal **Go**)
-- **reports/** — empty except `README.md`
+When you tag `v*` on **LiNKdev** `main`, the workflow **Sync LiNKdev to installations** runs `scripts/sync-installations.sh` and pushes factory + shim updates to every registered repo ( **`LiNKdev/product/` is never overwritten** ).
 
-Factory bootstrap history remains under `LiNKdev/factory/programs/bootstrap/` (not under `product/`).
+Details: [docs/SYNC-INSTALLATIONS.md](docs/SYNC-INSTALLATIONS.md).
 
-## First run (summary)
+Manual upgrade one repo:
 
-1. `install.sh` → target repo
-2. Wire — checklist + GitHub labels + automations
-3. Principal **Go** → cloud Planner → program under `LiNKdev/product/programs/`
-4. Autonomous issue loop per `LiNKdev/factory/SPEC.md`
+```bash
+./scripts/sync-installations.sh /path/to/product-repo
+```
+
+## Virgin `product/` (template only)
+
+`product/grounding/` stubs, empty `programs/`, empty `reports/`. Factory bootstrap lives under `LiNKdev/factory/programs/bootstrap/`.
 
 ## Source
 
-Built from `LiNKdev/` in LiNKtrend-System; published as a standalone template without LiNKtrend product grounding or `archive/`.
+Canonical studio instance: `linktrend/LiNKtrend-System` on branch `development`.

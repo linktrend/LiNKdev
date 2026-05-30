@@ -13,17 +13,12 @@ Usage: install.sh <target-repo-root> [--force]
 
 Copies LiNKdev/ and .cursor/ from this template into the target repository.
 
-  <target-repo-root>  Absolute or relative path to an existing git repo root
-  --force             Overwrite existing LiNKdev/ and .cursor/ (destructive)
-
-Examples:
-  ./install.sh ../my-app
-  ./install.sh /Users/me/Projects/my-app --force
+  <target-repo-root>  Path to an existing git repo root
+  --force             Overwrite existing LiNKdev/ and .cursor/ (destructive to pack; never deletes product/ if you merge manually)
 
 After install:
-  1. Open the target repo in Cursor
-  2. Follow LiNKdev/factory/install/CHECKLIST.md (wire flow)
-  3. Principal says Go when wire + automations are ready
+  1. Register the repo in linktrend/LiNKdev registry/installations.json for auto-sync on future tags
+  2. Principal launch lines: LiNKdev/factory/install/PRINCIPAL-LAUNCH.md
 
 EOF
 }
@@ -44,30 +39,38 @@ if [[ -z "$TARGET" ]]; then
   exit 1
 fi
 
-TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" || {
-  echo "error: target directory does not exist: $1" >&2
-  exit 1
-}
+TARGET="$(cd "$TARGET" && pwd)"
 
 if [[ ! -d "$SRC_LINKDEV" || ! -d "$SRC_CURSOR" ]]; then
-  echo "error: template missing LiNKdev/ or .cursor/ under ${TEMPLATE_ROOT}" >&2
+  echo "error: template missing LiNKdev/ or .cursor/" >&2
   exit 1
 fi
 
 if [[ -e "${TARGET}/LiNKdev" || -e "${TARGET}/.cursor" ]]; then
   if [[ "$FORCE" != true ]]; then
-    echo "error: ${TARGET} already has LiNKdev/ or .cursor/. Re-run with --force to replace." >&2
+    echo "error: target already has LiNKdev/ or .cursor/. Use --force or run scripts/sync-installations.sh <target> to upgrade factory only." >&2
     exit 1
   fi
   rm -rf "${TARGET}/LiNKdev" "${TARGET}/.cursor"
 fi
 
-echo "Installing LiNKdev from template $(cat "$VERSION_FILE" 2>/dev/null || echo unknown) → ${TARGET}"
+VER="$(cat "$VERSION_FILE" 2>/dev/null || echo unknown)"
+echo "Installing LiNKdev v${VER} → ${TARGET}"
 
 cp -R "$SRC_LINKDEV" "${TARGET}/LiNKdev"
 cp -R "$SRC_CURSOR" "${TARGET}/.cursor"
 
-echo "Done."
-echo "  LiNKdev/  → ${TARGET}/LiNKdev"
-echo "  .cursor/  → ${TARGET}/.cursor"
-echo "Next: LiNKdev/factory/install/CHECKLIST.md"
+cat > "${TARGET}/LiNKdev/TEMPLATE_VERSION.md" <<EOF
+# Installed LiNKdev template
+
+| Field | Value |
+|-------|-------|
+| Template repo | https://github.com/linktrend/LiNKdev |
+| Version | ${VER} |
+| Tag | v${VER} |
+| Installed | $(date -u +%Y-%m-%dT%H:%MZ) |
+
+Register this repo in LiNKdev \`registry/installations.json\` to receive automatic sync on future template tags.
+EOF
+
+echo "Done. Next: LiNKdev/factory/install/PRINCIPAL-LAUNCH.md"

@@ -1,0 +1,35 @@
+name: Sync LiNKdev to installations
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Template VERSION file already on main; leave empty to use repo VERSION'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show template version
+        run: echo "VERSION=$(cat VERSION)"
+
+      - name: Sync to registered installations
+        env:
+          GH_TOKEN: ${{ secrets.LINKDEV_SYNC_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.LINKDEV_SYNC_TOKEN }}
+        run: |
+          if [[ -z "${LINKDEV_SYNC_TOKEN:-}" ]]; then
+            echo "ERROR: Add repo secret LINKDEV_SYNC_TOKEN (PAT or fine-grained token with contents:write on all registered repos)."
+            exit 1
+          fi
+          chmod +x scripts/sync-installations.sh upgrade.sh install.sh
+          ./scripts/sync-installations.sh

@@ -1,0 +1,10 @@
+{
+  "comment": "Repos that receive factory sync when LiNKdev tags a release. Add one object per installed repo.",
+  "installations": [
+    {
+      "repo": "linktrend/LiNKtrend-System",
+      "branch": "development",
+      "preserve_product": true
+    }
+  ]
+}

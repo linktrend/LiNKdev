@@ -27,4 +27,6 @@ When executing an issue: read **only** `read_first` + `report_path` on that issu
 
 ## Bootstrap
 
-If `LiNKdev/` is missing, run repo-root `install.sh` from the LiNKdev template pack.
+If `LiNKdev/` is missing, copy the LiNKdev template first.
+
+Do **not** read `LiNKdev/archive/` for active work unless an issue explicitly requires historical lookup.

@@ -19,7 +19,7 @@ Copy **only** **`.cursor/`** + **`LiNKdev/`** to new repos. Do **not** add a roo
 4. `LiNKdev/skills/SKILLS_CATALOG.md` — open **one** skill path listed on issue or role table
 5. `LiNKdev/product/grounding/` — **only** files listed in `read_first`
 
-Do **not** list or glob `product/reports/` or full `grounding/`.
+Do **not** list or glob `product/reports/`, `archive/`, or full `grounding/`.
 
 ## Skills
 
@@ -43,4 +43,8 @@ Principal **Go** → cloud Planner Q&A → finished-product narrative → OK →
 
 ## Principal
 
-Go, Continue, Release OK, `staging` / `main` promotion only by Principal.
+Go, Continue, Release OK, staging/main only.
+
+## LiNKtrend
+
+Product rules: `.cursor/rules/`. Legacy issues: `product/programs/linktrend-system/issues/legacy/`.
