@@ -79,6 +79,8 @@ sync_remote() {
 
   (
     cd "${work}/repo"
+    git config user.email "linkdev-sync@users.noreply.github.com"
+    git config user.name "LiNKdev Sync"
     git add LiNKdev/factory LiNKdev/skills LiNKdev/AGENTS.md LiNKdev/README.md LiNKdev/TEMPLATE_VERSION.md \
       .cursor/commands .cursor/rules/00-linkdev-bootstrap.mdc .cursor/skills/README.md .cursor/agents/README.md
     if git diff --staged --quiet; then
