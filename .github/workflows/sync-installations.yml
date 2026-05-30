@@ -27,8 +27,8 @@ jobs:
           GH_TOKEN: ${{ secrets.LINKDEV_SYNC_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.LINKDEV_SYNC_TOKEN }}
         run: |
-          if [[ -z "${LINKDEV_SYNC_TOKEN:-}" ]]; then
-            echo "ERROR: Add repo secret LINKDEV_SYNC_TOKEN (PAT or fine-grained token with contents:write on all registered repos)."
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "ERROR: Add repo secret LINKDEV_SYNC_TOKEN (PAT with contents:write on all registered repos)."
             exit 1
           fi
           chmod +x scripts/sync-installations.sh upgrade.sh install.sh

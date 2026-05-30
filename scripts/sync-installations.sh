@@ -70,7 +70,11 @@ sync_remote() {
     return 0
   fi
 
-  git clone --depth 1 --branch "$branch" "https://github.com/${repo}.git" "${work}/repo"
+  local clone_url="https://github.com/${repo}.git"
+  if [[ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]]; then
+    clone_url="https://x-access-token:${GH_TOKEN:-${GITHUB_TOKEN}}@github.com/${repo}.git"
+  fi
+  git clone --depth 1 --branch "$branch" "$clone_url" "${work}/repo"
   sync_to_path "${work}/repo"
 
   (
@@ -82,7 +86,11 @@ sync_remote() {
       exit 0
     fi
     git commit -m "chore(linkdev): sync template v${VERSION} from linktrend/LiNKdev"
-    git push origin "$branch"
+    if [[ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]]; then
+      git push "https://x-access-token:${GH_TOKEN:-${GITHUB_TOKEN}}@github.com/${repo}.git" "HEAD:${branch}"
+    else
+      git push origin "$branch"
+    fi
   )
   rm -rf "$work"
   echo "OK: pushed ${repo}@${branch}"
