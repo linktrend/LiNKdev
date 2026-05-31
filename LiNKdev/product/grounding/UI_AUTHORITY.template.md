@@ -6,24 +6,24 @@ Stable reference for **where UI rules live in this host repo**. Planner or wire 
 
 | Surface | Audience | Authority |
 |---------|----------|-----------|
-| **Operator UI** | LiNKaios / studio operators | Host product rule + ui-system doc + token module (below) |
-| **Customer UI** | End customers (e.g. LinkSites published sites) | Separate app/template rules in the customer-facing repo or suite — **not** operator shell standards |
+| **Operator UI** | Internal operators / staff | Host product rule + ui-system doc + token module (below) |
+| **Customer UI** | End customers (published sites, apps, etc.) | Separate app/template rules in the customer-facing repo or suite — **not** operator shell standards |
 
-Do not apply operator shell chrome, `ui-standards.ts` tokens, or LiNKaios table/form families to customer marketing sites unless an issue explicitly requires it.
+Do not apply operator shell chrome, `{host-app}/src/lib/ui-standards.ts` tokens, or operator table/form families to customer marketing sites unless an issue explicitly requires it.
 
 ## Operator UI authority chain
 
 Read in order when implementing or reviewing operator UI:
 
 1. **Product Cursor rule** — `{host}/.cursor/rules/08-*.mdc`
-2. **UI system index** — `{host-app}/docs/ui-system.md` (layer map, shadcn migration, component families)
+2. **UI system index** — `{host-app}/docs/ui-system.md` (layer map, component library, component families)
 3. **Token module** — `{host-app}/src/lib/ui-standards.ts` (or documented equivalent path)
 
 Replace `{host}` and `{host-app}` with this repository’s real paths during wire.
 
-## Component families (LiNKaios-style hosts)
+## Component families (operator UI hosts)
 
-When the host ships LiNKaios-style operator UI, prefer these families before inventing inline patterns:
+When the host ships operator web UI, prefer documented component families before inventing inline patterns:
 
 | Family | Use for | Host skill (copy to `LiNKdev/skills/host/` on wire) |
 |--------|---------|-----------------------------------------------------|
@@ -38,7 +38,7 @@ Skills are **host-local** — they reference this repo’s component paths, not 
 
 - [ ] `UI_AUTHORITY.md` filled with real paths (this file renamed and completed)
 - [ ] Host `.cursor/rules/08-*` present or documented N/A for non-web products
-- [ ] LiNKaios-style UI skills copied to `LiNKdev/skills/host/` when operator UI exists
+- [ ] Operator UI skills copied to `LiNKdev/skills/host/` when operator UI exists
 - [ ] Issue `read_first` lists specific UI files — agents do not glob the whole app tree
 
 ## Related factory docs
