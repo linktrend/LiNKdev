@@ -9,3 +9,4 @@ Stable product truth for **this repository**. Issues list exact `read_first` pat
 | `INTENT.md` | Program intent (Planner after Principal OK) |
 | `CONSTRAINTS.md` | Stack and boundaries |
 | `GLOSSARY.md` | Terms |
+| `UI_AUTHORITY.template.md` | Wire stub → copy to `UI_AUTHORITY.md` with host UI paths |
