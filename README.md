@@ -17,13 +17,15 @@ Copy **only** `LiNKdev/` + `.cursor/` into product repos. **Principal** is the s
 
 ## Principal launch (wire — three lines only)
 
-See **`LiNKdev/factory/install/PRINCIPAL-LAUNCH.md`**.
+See **`LiNKdev/factory/install/PRINCIPAL-LAUNCH.md`**. Dispatch v2: **`LiNKdev/factory/docs/DISPATCH.md`**.
 
 | Step | Agent | One line |
 |------|--------|----------|
 | A | Cursor | `Execute the EXECUTE-WIRE-LINKDEV.md prompt in LiNKdev/factory/install/` |
-| B | Codex | `Execute the EXECUTE-LINKDEV-UI-AUTOMATIONS.md prompt in LiNKdev/factory/install/` |
-| C | Cursor | `Execute the EXECUTE-WIRE-LINKDEV-POST-UI.md prompt in LiNKdev/factory/install/` |
+| B | Cursor | `Execute the EXECUTE-LINKDEV-DISPATCH-INSTALL.md prompt in LiNKdev/factory/install/` |
+| C | Cursor | `Execute the EXECUTE-WIRE-LINKDEV-POST-DISPATCH.md prompt in LiNKdev/factory/install/` |
+
+**Manual:** add GitHub Actions secret **`CURSOR_API_KEY`** on each wired product repo.
 
 Agents run autonomously; you do not walk through the checklist.
 

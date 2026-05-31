@@ -5,6 +5,21 @@
       "repo": "linktrend/LiNKtrend-System",
       "branch": "development",
       "preserve_product": true
+    },
+    {
+      "repo": "linktrend/LiNKbot-core",
+      "branch": "development",
+      "preserve_product": true
+    },
+    {
+      "repo": "linktrend/LiNKautowork",
+      "branch": "development",
+      "preserve_product": true
+    },
+    {
+      "repo": "linktrend/LiNKsites",
+      "branch": "development",
+      "preserve_product": true
     }
   ]
 }

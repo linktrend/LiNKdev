@@ -10,6 +10,7 @@ When you improve [linktrend/LiNKdev](https://github.com/linktrend/LiNKdev), regi
 4. `scripts/sync-installations.sh` updates each repo in **`registry/installations.json`**:
    - Overwrites: `LiNKdev/factory/`, `LiNKdev/skills/`, portable `.cursor` shim files
    - Preserves: `LiNKdev/product/` and product `.cursor/rules/01`–`08`
+   - Does **not** copy `.github/workflows/` — after sync, copy dispatch workflows once per repo (see `LiNKdev/factory/docs/DISPATCH.md`) and ensure **`CURSOR_API_KEY`** is set in each repo's GitHub Actions secrets
 
 ## Register a repo
 
@@ -34,6 +35,17 @@ In **LiNKdev** GitHub → Settings → Secrets:
 | `LINKDEV_SYNC_TOKEN` | PAT or GitHub App token with **write** access to every registered repo |
 
 Without this secret, tags still publish the template but installations are not auto-pushed.
+
+## Per-repo dispatch (not synced automatically)
+
+Each **product** repository wired for LiNKdev needs:
+
+| Item | Where |
+|------|--------|
+| `CURSOR_API_KEY` | GitHub Actions secrets on that repo |
+| `linkdev-dispatch.yml`, `linkdev-guard.yml`, `branch-source-policy.yml` | Copy from `LiNKdev/factory/install/github/` to `.github/workflows/` |
+
+Template version **1.2.0+** ships dispatch v2 scripts and workflow stubs in `LiNKdev/factory/`.
 
 ## Manual sync
 
