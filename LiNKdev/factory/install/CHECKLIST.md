@@ -55,6 +55,7 @@ LiNKdev/factory/scripts/install-labels.sh
 **Principal adds** (agents document status only):
 
 - [ ] GitHub Actions secret `CURSOR_API_KEY` configured on this repository
+- [ ] (Optional) GitHub Actions secret `LINKDEV_SLACK_WEBHOOK_URL` for Principal Slack alerts
 
 ## 5. Dispatch triggers (verify)
 
