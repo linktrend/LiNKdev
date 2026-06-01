@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+import {
+  countFinishedNoPrHeals,
+  FINISHED_NO_PR_MAX_HEALS,
+} from './linkdev-factory-escalation.mjs';
+import { issueHasMergedPr, shouldSkipFactoryIssue } from './linkdev-issue-terminal.mjs';
+import { stallCycleStartAt, stallEventKey } from './linkdev-stall-clock.mjs';
+
 /**
  * LiNKdev — optional Principal Slack alerts via incoming webhook.
  * Called from sync-agent-watch.mjs (GitHub Actions). No-op if LINKDEV_SLACK_WEBHOOK_URL unset.
@@ -6,10 +13,10 @@
  * Notifies on:
  * - linkdev:principal-stop (your turn)
  * - linkdev:blocked (factory stuck)
- * - active-wave stall: in-progress/ready, no PR, 30+ min without factory progress
+ * - active-wave stall: in-progress/ready, no PR, 15+ min without factory progress
  */
 const SLACK_MARKER = '[linkdev-slack-sent]';
-const STALL_NOTIFY_MINUTES = 30;
+const STALL_NOTIFY_MINUTES = 15;
 const NOTIFY_COOLDOWN_MINUTES = 60;
 
 async function gh(args) {
@@ -31,7 +38,16 @@ function minutesSince(iso) {
 }
 
 function recentSlackSent(comments, eventKey) {
-  const hit = [...comments].reverse().find((c) => c.body?.includes(SLACK_MARKER) && c.body?.includes(`event=${eventKey}`));
+  const cycleStart = stallCycleStartAt(comments);
+  const cycleStartMs = cycleStart ? new Date(cycleStart).getTime() : 0;
+  const hit = [...comments]
+    .reverse()
+    .find(
+      (c) =>
+        c.body?.includes(SLACK_MARKER) &&
+        c.body?.includes(`event=${eventKey}`) &&
+        new Date(c.createdAt).getTime() >= cycleStartMs,
+    );
   if (!hit?.createdAt) return false;
   return minutesSince(hit.createdAt) < NOTIFY_COOLDOWN_MINUTES;
 }
@@ -71,21 +87,35 @@ async function issueHasOpenPr(repo, ltsId) {
   }
 }
 
-function lastFactoryActivityAt(comments) {
-  let latest = 0;
-  for (const c of comments) {
-    if (!c.body?.match(/\[linkdev-(dispatch|agent-watch|auto-heal)\]/)) continue;
-    const t = new Date(c.createdAt).getTime();
-    if (t > latest) latest = t;
+function lastStallActivityAt(comments) {
+  return stallCycleStartAt(comments);
+}
+
+async function refreshIssueComments(repo, number) {
+  try {
+    const view = JSON.parse(await gh(['issue', 'view', String(number), '--repo', repo, '--json', 'comments']));
+    return view.comments ?? [];
+  } catch {
+    return [];
   }
-  return latest ? new Date(latest).toISOString() : null;
 }
 
 async function notifyIssue(repo, { number, title, ltsId, eventKey, message, comments, dryRun }) {
   if (recentSlackSent(comments, eventKey)) return false;
+  // Record marker before Slack post to dedupe parallel watch runs (L-014).
+  if (!dryRun) {
+    await recordSlackSent(repo, number, eventKey, message.split('\n')[0], dryRun);
+    const fresh = await refreshIssueComments(repo, number);
+    if (fresh.filter((c) => c.body?.includes(SLACK_MARKER) && c.body?.includes(`event=${eventKey}`)).length > 1) {
+      console.log(`slack dedupe skip #${number} event=${eventKey} (parallel marker)`);
+      return false;
+    }
+  }
   const sent = dryRun ? true : await postSlack(message);
   if (!sent) return false;
-  await recordSlackSent(repo, number, eventKey, message.split('\n')[0], dryRun);
+  if (dryRun) {
+    await recordSlackSent(repo, number, eventKey, message.split('\n')[0], dryRun);
+  }
   console.log(`slack notify #${number} event=${eventKey}`);
   return true;
 }
@@ -128,28 +158,67 @@ export async function notifyPrincipalSlack(opts) {
     }
   }
 
+  if (activeIssueNumbers.size === 0) {
+    console.log('SLACK_SKIP no active program issues in STATE');
+  }
+
   for (const [ltsId, meta] of Object.entries(issueMap)) {
     const num = meta.github_number;
-    if (activeIssueNumbers.size > 0 && !activeIssueNumbers.has(num)) continue;
 
     const view = JSON.parse(
-      await gh(['issue', 'view', String(num), '--repo', repo, '--json', 'title,labels,comments']),
+      await gh(['issue', 'view', String(num), '--repo', repo, '--json', 'title,state,labels,comments']),
     );
     const labels = view.labels?.map((l) => l.name) ?? [];
-    if (labels.includes('linkdev:review-ready') || labels.includes('linkdev:done')) continue;
+    const hasMergedPr = await issueHasMergedPr(repo, ltsId, gh);
+    if (
+      shouldSkipFactoryIssue({
+        state: view.state,
+        labelNames: labels,
+        githubNumber: num,
+        ltsId,
+        activeIssueNumbers,
+        hasMergedPr,
+      })
+    ) {
+      continue;
+    }
     if (labels.includes('linkdev:blocked') || labels.includes('linkdev:principal-stop')) continue;
-    if (!labels.includes('linkdev:in-progress') && !labels.includes('linkdev:ready')) continue;
+    const isActive = labels.includes('linkdev:in-progress') || labels.includes('linkdev:ready');
+    if (!isActive) continue;
     if (await issueHasOpenPr(repo, ltsId)) continue;
 
     const comments = view.comments ?? [];
-    const lastActivity = lastFactoryActivityAt(comments);
-    if (minutesSince(lastActivity) < STALL_NOTIFY_MINUTES) continue;
+    const cycleStart = stallCycleStartAt(comments);
+    const finishedNoPrCount = countFinishedNoPrHeals(comments, cycleStart);
+    if (finishedNoPrCount >= FINISHED_NO_PR_MAX_HEALS) {
+      const eventKey = `finished_no_pr_escalation_${num}`;
+      const message = [
+        ':rotating_light: *LiNKdev — executor failed twice without PR*',
+        `*${view.title}* (${ltsId}, #${num})`,
+        'Auto-heal paused; issue labeled `linkdev:principal-stop`. Local implementer should open PR.',
+        issueUrl(repo, num),
+      ].join('\n');
+      if (await notifyIssue(repo, { number: num, title: view.title, ltsId, eventKey, message, comments, dryRun })) {
+        sent += 1;
+        continue;
+      }
+    }
 
-    const eventKey = `stall_${num}`;
+    const recentFinishedNoPr = comments.some(
+      (c) => c.body?.includes('[linkdev-finished-no-pr]') || (c.body?.includes('[linkdev-agent-watch]') && c.body?.includes('FINISHED') && !/\| PR \|/.test(c.body ?? '')),
+    );
+    const stallThreshold = recentFinishedNoPr ? 0 : STALL_NOTIFY_MINUTES;
+    const lastActivity = lastStallActivityAt(comments);
+    if (!lastActivity) continue;
+    if (minutesSince(lastActivity) < stallThreshold) continue;
+
+    const eventKey = recentFinishedNoPr ? `finished_no_pr_${num}` : stallEventKey(num, comments);
     const message = [
-      ':hourglass_flowing_sand: *LiNKdev — task stalled*',
+      recentFinishedNoPr ? ':warning: *LiNKdev — executor finished without PR*' : ':hourglass_flowing_sand: *LiNKdev — task stalled*',
       `*${view.title}* (${ltsId}, #${num})`,
-      `No PR for ${STALL_NOTIFY_MINUTES}+ minutes. Factory auto-heal may retry; no action needed unless this repeats.`,
+      recentFinishedNoPr
+        ? 'Cloud executor reported FINISHED but no PR exists. Factory auto-heal is re-dispatching.'
+        : `No PR for ${STALL_NOTIFY_MINUTES}+ minutes. Factory auto-heal may retry; no action needed unless this repeats.`,
       issueUrl(repo, num),
     ].join('\n');
     if (await notifyIssue(repo, { number: num, title: view.title, ltsId, eventKey, message, comments, dryRun })) {
