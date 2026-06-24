@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Run LiNKdev completion gates from factory/gates/catalog.json.
+# shellcheck disable=SC2317
 set -euo pipefail
 
 TIER=""
@@ -7,7 +8,6 @@ PROGRAM=""
 REPORT=""
 SCOPE="${LINKDEV_SCOPE:-LiNKdev}"
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CATALOG="$ROOT/LiNKdev/factory/gates/catalog.json"
 
 FAILURES=0

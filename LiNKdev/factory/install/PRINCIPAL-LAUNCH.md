@@ -10,6 +10,8 @@ You only send **one line** per step. Agents read the full prompt from `LiNKdev/f
 
 **Manual (Principal, once per repo):** GitHub → Settings → Secrets → Actions → add **`CURSOR_API_KEY`** (from Cursor Dashboard → API Keys). Agents cannot set this for you.
 
+**Optional — Slack alerts:** Add **`LINKDEV_SLACK_WEBHOOK_URL`** (Slack app → Incoming Webhooks → copy URL). LiNKdev agent watch sends plain-English messages for your-turn, blocked, and 30+ minute stalls. Skip if unset.
+
 **Go** (program start) is a separate fourth message later — only when you intend to run the product program. Use the `linkdev-go` Cursor command or say **Go** per SPEC.
 
 Do not walk through the checklist yourself. Do not answer agent questions unless an agent reports a **blocker** it cannot fix.

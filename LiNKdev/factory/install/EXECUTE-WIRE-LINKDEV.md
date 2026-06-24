@@ -50,6 +50,7 @@ mkdir -p .github/workflows
 cp LiNKdev/factory/install/github/linkdev-guard.yml .github/workflows/
 cp LiNKdev/factory/install/github/linkdev-dispatch.yml .github/workflows/
 cp LiNKdev/factory/install/github/linkdev-planner-bootstrap.yml .github/workflows/
+cp LiNKdev/factory/install/github/linkdev-orchestrator-bootstrap.yml .github/workflows/
 cp LiNKdev/factory/install/github/branch-source-policy.yml .github/workflows/
 ```
 
@@ -63,7 +64,8 @@ Do **not** configure Cursor Automations UI. In `WIRE-SESSION.md` set:
 ## Dispatch (Step B)
 - Status: pending_dispatch_install
 - Principal launches: Execute the EXECUTE-LINKDEV-DISPATCH-INSTALL.md prompt in LiNKdev/factory/install/
-- Principal manual: add GitHub secret CURSOR_API_KEY
+- Principal manual: add GitHub secret `CURSOR_API_KEY`
+- Principal optional: add GitHub secret `LINKDEV_SLACK_WEBHOOK_URL` (Slack incoming webhook for agent-watch alerts)
 ```
 
 ## Section 6 — Skills
